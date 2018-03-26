@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body>
+		<p>手机号码：<input id="loginname" data-name="账号" type="text" placeholder="请输入账号/手机号码" /></p>
+		<p>手机号码：<input id="phone" type="text" /></p>
+		<p>密码：<input type="text" placeholder="请输入密码" /></p>
+		<p>验证码：<input type="text" placeholder="请输入验证码" /><button id="btn">获取验证码</button></p>
+	</body>
+	<script src="jquery-2.1.0.js"></script>
+	<script>
+		$('input').blur(function(event){
+			console.log(event);
+			if(!bxdValidate.check()){
+				console.log('验证错误处理');
+			}
+		});
+		
+		//代理
+		$('body').on('blur', '#loginname',function(){
+			alert(111);
+		});
+		
+		//需求：绑定失焦事件，返回reue或者false
+		var bxdValidate = (function() {
+			var time = 60;
+
+			return {
+				//参数(val = 字符串, reg = 正则)
+				check: function(val, reg) {
+					if(reg) {
+						return reg.test(val);
+					} else {
+						return val.length != 0;
+					}
+				},
+
+				//电话号码
+				checkphone: function(phone) {
+					return /^((1[3-8][0-9])+\d{8})$/.test(phone);
+				},
+
+				//获取验证码
+				checkCode: function($this, phone, url, data) {
+					var codeTime = this.time;
+					//按钮设置disable
+					if($this.attr('disabled')) {
+						return;
+					}
+					//验证手机号码
+					var result = this.checkphone(phone);
+					if(result) {
+						$.ajax({
+							type: 'POST',
+							url: url,
+							data: data,
+							success: function(res) {
+								console.log(res);
+								var timer = setInterval(function() {
+									$this.attr('disabled', true);
+									codeTime--;
+									$this.text('点击重发（' + codeTime + 's)');
+									if(codeTime == 1) {
+										$this.attr('disabled', false);
+										clearInterval(timer);
+										$this.val('点击获取验证码');
+										codeTime = 60;
+									}
+								}, 1000);
+							},
+							error: function(err) {
+								console.log(err);
+							}
+						});
+					};
+				}
+			}
+		})();
+
+		//去除字符串空格，前后中间空格都去除
+		function strTrim(str) {
+			return str.replace(/\s|\xA0/g, "");
+		}
+
+	</script>
+
+</html>
