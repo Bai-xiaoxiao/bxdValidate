@@ -15,15 +15,16 @@
 	<script src="jquery-2.1.0.js"></script>
 	<script>
 		$('input').blur(function(event){
-			console.log(event);
-			if(!bxdValidate.check()){
-				console.log('验证错误处理');
-			}
+//			console.log(event);
+//			if(!bxdValidate.check()){
+//				console.log('验证错误处理');
+//			}
 		});
 		
 		//代理
-		$('body').on('blur', '#loginname',function(){
-			alert(111);
+		$('body').on('blur', '#loginname',function(e){
+			console.log($(this).val());
+			console.log(bxdValidate.checkCode($(this).val()));
 		});
 		
 		//需求：绑定失焦事件，返回reue或者false
@@ -32,7 +33,7 @@
 
 			return {
 				//参数(val = 字符串, reg = 正则)
-				check: function(val, reg) {
+				initCheck: function(val, reg) {
 					if(reg) {
 						return reg.test(val);
 					} else {
@@ -44,9 +45,18 @@
 				checkphone: function(phone) {
 					return /^((1[3-8][0-9])+\d{8})$/.test(phone);
 				},
-
-				//获取验证码
-				checkCode: function($this, phone, url, data) {
+				
+				//验证手机验证码--纯数字
+				checkCode: function (num){
+					if(num){
+						return /^[0-9]*$/.test(num);
+					}else{
+						return false;
+					}
+				},
+				
+				//获取验证码---按钮类型为button
+				getCode: function($this, phone, url, data) {
 					var codeTime = this.time;
 					//按钮设置disable
 					if($this.attr('disabled')) {
@@ -68,7 +78,7 @@
 									if(codeTime == 1) {
 										$this.attr('disabled', false);
 										clearInterval(timer);
-										$this.val('点击获取验证码');
+										$this.text('点击获取验证码');
 										codeTime = 60;
 									}
 								}, 1000);
@@ -78,7 +88,8 @@
 							}
 						});
 					};
-				}
+				},
+				
 			}
 		})();
 
@@ -86,7 +97,21 @@
 		function strTrim(str) {
 			return str.replace(/\s|\xA0/g, "");
 		}
-
+		
+		//全角转换为半角函数 
+	    function ToCDB(str) {
+	        var tmp = "";
+	        for (var i = 0; i < str.length; i++) {
+	            if (str.charCodeAt(i) > 65248 && str.charCodeAt(i) < 65375) {
+	                tmp += String.fromCharCode(str.charCodeAt(i) - 65248);
+	            }
+	            else {
+	                tmp += String.fromCharCode(str.charCodeAt(i));
+	            }
+	        }
+	        return tmp;
+	    }
+	    
 	</script>
 
 </html>
