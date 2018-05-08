@@ -1,117 +1,202 @@
-<!DOCTYPE html>
-<html>
+function SecuritySetting() {
+    
+}
 
-	<head>
-		<meta charset="UTF-8">
-		<title></title>
-	</head>
-
-	<body>
-		<p>手机号码：<input id="loginname" data-name="账号" type="text" placeholder="请输入账号/手机号码" /></p>
-		<p>手机号码：<input id="phone" type="text" /></p>
-		<p>密码：<input type="text" placeholder="请输入密码" /></p>
-		<p>验证码：<input type="text" placeholder="请输入验证码" /><button id="btn">获取验证码</button></p>
-	</body>
-	<script src="jquery-2.1.0.js"></script>
-	<script>
-		$('input').blur(function(event){
-//			console.log(event);
-//			if(!bxdValidate.check()){
-//				console.log('验证错误处理');
-//			}
-		});
-		
-		//代理
-		$('body').on('blur', '#loginname',function(e){
-			console.log($(this).val());
-			console.log(bxdValidate.checkCode($(this).val()));
-		});
-		
-		//需求：绑定失焦事件，返回reue或者false
-		var bxdValidate = (function() {
-			var time = 60;
-
-			return {
-				//参数(val = 字符串, reg = 正则)
-				initCheck: function(val, reg) {
-					if(reg) {
-						return reg.test(val);
-					} else {
-						return val.length != 0;
-					}
-				},
-
-				//电话号码
-				checkphone: function(phone) {
-					return /^((1[3-8][0-9])+\d{8})$/.test(phone);
-				},
-				
-				//验证手机验证码--纯数字
-				checkCode: function (num){
-					if(num){
-						return /^[0-9]*$/.test(num);
-					}else{
-						return false;
-					}
-				},
-				
-				//获取验证码---按钮类型为button
-				getCode: function($this, phone, url, data) {
-					var codeTime = this.time;
-					//按钮设置disable
-					if($this.attr('disabled')) {
-						return;
-					}
-					//验证手机号码
-					var result = this.checkphone(phone);
-					if(result) {
-						$.ajax({
-							type: 'POST',
-							url: url,
-							data: data,
-							success: function(res) {
-								console.log(res);
-								var timer = setInterval(function() {
-									$this.attr('disabled', true);
-									codeTime--;
-									$this.text('点击重发（' + codeTime + 's)');
-									if(codeTime == 1) {
-										$this.attr('disabled', false);
-										clearInterval(timer);
-										$this.text('点击获取验证码');
-										codeTime = 60;
-									}
-								}, 1000);
-							},
-							error: function(err) {
-								console.log(err);
-							}
-						});
-					};
-				},
-				
-			}
-		})();
-
-		//去除字符串空格，前后中间空格都去除
-		function strTrim(str) {
-			return str.replace(/\s|\xA0/g, "");
-		}
-		
-		//全角转换为半角函数 
-	    function ToCDB(str) {
-	        var tmp = "";
-	        for (var i = 0; i < str.length; i++) {
-	            if (str.charCodeAt(i) > 65248 && str.charCodeAt(i) < 65375) {
-	                tmp += String.fromCharCode(str.charCodeAt(i) - 65248);
-	            }
-	            else {
-	                tmp += String.fromCharCode(str.charCodeAt(i));
-	            }
-	        }
-	        return tmp;
-	    }
-	    
-	</script>
-
-</html>
+SecuritySetting.prototype = {
+    initPage: function () {
+        this.passwordContent();
+        this.phoneContent();
+        this.questionContent();
+        this.setWizard();
+        this.validata();
+    },
+    passwordContent: function () {
+        //修改密码
+        $('#setPassword').click(function () {
+            $('.SecuritySetting').hide();
+            $('.passwordContent').show();
+        });
+    },
+    phoneContent: function () {
+        //修改手机号码
+        $('#setPhone').click(function () {
+            $('.SecuritySetting').hide();
+            $('#phoneContent').show();
+        });
+        $('.changeType').click(function () {
+            if ($('.phoneType').attr('data-type') == 'true') {
+                $('.phoneType').attr('data-type', 'false').hide();
+                $('.questionType').attr('data-type', 'true').show();
+            } else {
+                $('.phoneType').attr('data-type', 'true').show();
+                $('.questionType').attr('data-type', 'false').hide();
+            }
+        });
+        //验证密码失焦
+        $('.phoneType input').blur(function () {
+            var itp = $(this);
+            if (itp.val()) {
+                itp.attr('data-original-title', '').tooltip('show');
+                itp.parent().removeClass('has-error');
+            } else {
+                itp.attr('data-original-title', '请输入验证码').tooltip('show');
+                itp.parent().addClass('has-error');
+            }
+        });
+        //第一步-手机验证-提交
+        //$('.phoneType .step1_next').click(function () {
+        //    var itp = $('.phoneType input');
+        //    if (itp.val()) {
+        //        itp.attr('data-original-title', '').tooltip('show');
+        //        itp.parent().removeClass('has-error');
+        //        alert('提交');
+        //        $('#wizard').wizard('goTo', 1);
+        //        $("#phoneContent .step2_next").click(function () {
+        //            $('#wizard').wizard('goTo', 2);
+        //        });
+        //    } else {
+        //        itp.attr('data-original-title', '请输入验证码').tooltip('show');
+        //        itp.parent().addClass('has-error');
+        //    }
+        //});
+        //第一步-问题验证-提交
+        //$('.questionType .step1_next').click(function () {
+            //var a1 = $('.anser1'),
+            //    a2 = $('.anser2'),
+            //    a3 = $('.anser3');
+            //if (!a1.val()) {
+            //    a1.attr('data-original-title', '请输入问题答案').tooltip('show');
+            //    a1.parent().addClass('has-error');
+            //} else {
+            //    alert('提交');
+            //    $('#wizard').wizard('goTo', 1);
+            //    $("#phoneContent .step2_next").click(function () {
+            //        $('#wizard').wizard('goTo', 2);
+            //    });
+            //}
+        //});
+    },
+    questionContent: function () {
+        //修改安全问题
+        $('#setQuestion').click(function () {
+            $('.SecuritySetting').hide();
+            $('#questionContent').show();
+        });
+    },
+    //生成步骤插件
+    setWizard: function () {
+        var wizard = $('#wizard').wizard({
+            templates: {
+                buttons: function buttons() {// 去掉前后的button
+                    return '';
+                }
+            }
+        }).data('wizard');
+        var wizard = $('#wizard2').wizard({
+            templates: {
+                buttons: function buttons() {// 去掉前后的button
+                    return '';
+                }
+            }
+        }).data('wizard');
+    },
+    showError: function (err) {
+       
+    },
+    validata: function () {
+        //更改校验组件错误信息显示方式
+        $.extend($.validator.messages, {
+            required: "这是必填字段"
+        });
+        $.validator.addMethod("valPhone", function (value, element) {
+            var reg = /^0?(13|15|18|14|17)[0-9]{9}$/;
+            return this.optional(element) || (reg.test(value));
+        }, "请输入正确的手机号码");
+        //验证密码
+        $.validator.addMethod("valnewPassword", function (value, element) {
+            var reg = /^[a-zA-Z0-9]{8,16}$/;
+            return this.optional(element) || (reg.test(value));
+        }, "密码必须为8-16位数字或字母");
+        //重复密码
+        $.validator.addMethod("valRePassword", function (value, element) {
+            return this.optional(element) || $(element).val() == $('input[name="newpassword"]').val();
+        }, "密码不一致，请确认密码");
+        $.validator.setDefaults({
+            onkeyup: false,
+            showErrors: function (errorMap, errorList) {
+                if (errorList.length == 0) {
+                    if (window.event || arguments.callee.caller.arguments[0]) {
+                        var event = window.event || arguments.callee.caller.arguments[0];
+                        var target = event.srcElement || event.target;
+                    } else {
+                        var target = arguments.callee.caller.caller.arguments[0]
+                    }
+                    $(target).parent().removeClass('has-error');
+                    $(target).attr('data-original-title', '').tooltip('show');
+                    return;
+                }
+                for (var i = 0; i < errorList.length; i++) {
+                    var errorElement = $(errorList[i].element);
+                    errorElement.parent().addClass('has-error');
+                    errorElement.attr('data-original-title', errorList[i].message).tooltip('show');
+                }
+            },
+        });
+        //修改密码
+        $("#passwordForm").validate({
+            rules: {
+                newpassword: {
+                    valnewPassword: true
+                },
+                repasswoasrd: {
+                    valRePassword: true
+                }
+            },
+            submitHandler: function () {
+                alert("提交事件!");
+                $('.passwordStep').hide();
+                $('.passwordSuccess').show();
+            }
+        });
+        //绑定手机第一步--获取验证码
+        $('#getCodeForm1').validate({
+            submitHandler: function () {
+                alert('提交');
+                $('#wizard').wizard('goTo', 1);
+            }
+        });
+        //绑定手机第一步--回答问题方式
+        $('#answerForm').validate({
+            submitHandler: function () {
+                alert('提交');
+                $('#wizard').wizard('goTo', 1);
+            }
+        });
+        //绑定手机第二步--绑定新手机号
+        $('#getCodeForm2').validate({
+            rules: {
+                newPhone: {
+                    valPhone: true
+                }
+            },
+            submitHandler: function () {
+                alert('提交');
+                $('#wizard').wizard('goTo', 2);
+            }
+        });
+        //设置问题第一步获取验证码
+        $('#getCodeForm3').validate({
+            submitHandler: function () {
+                alert('提交');
+                $('#wizard2').wizard('goTo', 1);
+            }
+        });
+        //设置问题第二步
+        $('#setAnswerForm').validate({
+            submitHandler: function () {
+                alert('提交');
+                $('#wizard2').wizard('goTo', 2);
+            }
+        });
+    }
+}
