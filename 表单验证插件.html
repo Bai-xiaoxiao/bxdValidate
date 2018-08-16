@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			.errMsg{
+				color: red;
+			}
+		</style>
+	</head>
+	<body>
+		<div>
+			这个需要是数字<input type="text" id="ipt1" />
+		</div>
+		<div>
+			这个需要小于0<input type="text" id="ipt2" />
+		</div>
+		<button id="submit">提交</button>
+		<script src="../jquery-2.1.0.js"></script>
+		<!--<script src="bxdValidate.js"></script>-->
+		<script src="bxdValidate.min.js"></script>
+		<script>
+			//需求:表单验证
+			//使用方式
+			//总体验证结果可以用aaa.res查看true/false
+			var aaa = new bxdValidate(
+				{el:'#ipt1', reg: /^[0-9]*$/, success: function(el){
+					 //成功时
+					 el.css('borderColor', 'inherit');
+				}, err: function(el){
+					//错误
+					el.css('borderColor', 'red');
+				}},
+				{el:'#ipt2', noReg: function(value){
+					//没有正则，需要手动返回true或者false
+					//val是节点的值
+					if(value < 0){
+						return true;
+					}
+					return false;
+				}},
+			);
+			
+			//api
+			// 初始化init()
+			//查看结果aaa.res
+			//提交时全部检查 aaa.checkAll();
+			$('#submit').click(function(){
+				aaa.checkAll();
+				console.log(aaa.res);
+			})
+		</script>
+	</body>
+</html>
