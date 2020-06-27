@@ -1,2 +1,2 @@
 # bxdValidate
-验证模块
+基于jquery的表单验证
